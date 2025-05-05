@@ -1,6 +1,7 @@
 file(GLOB_RECURSE LIB_SOURCES CONFIGURE_DEPENDS 
     src/data/*.cpp
     src/core/*.cpp
+    src/core/formatters/*.cpp
 )
 
 add_library(JsonParserLib STATIC ${LIB_SOURCES})

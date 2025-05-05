@@ -1,4 +1,5 @@
 #include "JsonArray.hpp"
+#include "formatters/JsonFormatConfig.hpp"
 
 JsonArray::JsonArray() = default;
 
@@ -49,8 +50,10 @@ void JsonArray::addValue(const JsonValue& value){
 }
 
 std::ostream& operator<<(std::ostream& os, const JsonArray& jsonArray){
-    //To do
-    os<<"Array";
+
+    const std::shared_ptr<JsonFormatter> formatter = JsonFormatConfig::getFormatter();
+
+    os << formatter -> format(jsonArray);
 
     return os;
 }

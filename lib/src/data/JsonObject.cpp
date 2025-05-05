@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "JsonObject.hpp"
+#include "formatters/JsonFormatConfig.hpp"
 
 JsonObject::JsonObject() = default;
 
@@ -105,8 +106,10 @@ void JsonObject::setValue(const std::string& key, const JsonValue& value){
 }
 
 std::ostream& operator<<(std::ostream& os, const JsonObject& jsonObject){
-    //To do
-    os<<"Object";
+    
+    const std::shared_ptr<JsonFormatter> formatter = JsonFormatConfig::getFormatter();
+
+    os << formatter -> format(jsonObject);
 
     return os;
 }
