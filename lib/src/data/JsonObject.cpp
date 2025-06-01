@@ -1,76 +1,125 @@
 #include <algorithm>
-#include "JsonObject.hpp"
-#include "formatters/JsonFormatConfig.hpp"
+#include "JsonValueVisitor.hpp"
+#include "JsonFormatConfig.hpp"
 
-JsonObject::JsonObject() = default;
 
-JsonObject::JsonObject(const std::list<std::string>& _keys, const std::unordered_map<std::string, JsonValue>& _objectData) : keys(_keys), objectData(_objectData) {}
+ValueType JsonObject::getType() const {
+    return ValueType::Object;
+}
 
-JsonObject::JsonObject(const JsonObject& other) : keys(other.keys), objectData(other.objectData) {}
+JsonValue* JsonObject::clone() const {
+    return new JsonObject(*this);
+}
 
-JsonObject& JsonObject::operator=(const JsonObject& other){
-    if(this != &other){
-        keys = other.keys;
-        objectData = other.objectData;
+void JsonObject::print(std::ostream& stream) const {
+    stream << JsonFormatConfig::getFormatter() -> format(this);
+}
+
+void JsonObject::accept(JsonValueVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+JsonObject::JsonObject(const std::list<std::string>& _keys, const std::unordered_map<std::string, JsonValue*>& _objectData) {
+    copyData(_keys, _objectData);
+}
+
+JsonObject::JsonObject(const JsonObject& other) {
+    copyData(other.keys, other.values);
+}
+
+JsonObject& JsonObject::operator=(const JsonObject& other) {
+     if(this != &other) {
+        deleteData();
+        values.clear();
+        copyData(other.keys, other.values);
     }
 
     return *this;
 }
 
-JsonObject::JsonObject(JsonObject&& other) noexcept : keys(std::move(other.keys)),  objectData(std::move(other.objectData)) {}
+JsonObject::JsonObject(JsonObject&& other) noexcept {
+    keys = other.keys;
+    values = other.values;
+    resetData(other.values);
+}
 
 JsonObject& JsonObject::operator=(JsonObject&& other) noexcept {
     if(this != &other){
-        keys = std::move(other.keys);
-        objectData = std::move(other.objectData);
+        deleteData();
+        values = other.values;
+        resetData(other.values);
     }
 
     return *this;
 }
 
-JsonObject::~JsonObject() = default;
+JsonObject::~JsonObject() {
+    deleteData();
+}
+
+void JsonObject::copyData(const std::list<std::string>& _keys, const std::unordered_map<std::string, JsonValue*>& _objectData) {
+    keys = _keys;
+
+    for(auto it = _objectData.begin(); it != _objectData.end(); it++) {
+        values.emplace(it -> first, it -> second -> clone());
+    }
+}
+
+void JsonObject::resetData(std::unordered_map<std::string, JsonValue*>& _objectData) {
+    for(auto it = _objectData.begin(); it != _objectData.end(); it++) {
+        it -> second = nullptr;
+    }
+}
+
+void JsonObject::deleteData() {
+    for(auto it = values.begin(); it != values.end(); it++) {
+        delete it -> second;
+
+        it -> second = nullptr;
+    }
+}
 
 size_t JsonObject::getSize() const {
-    return objectData.size();
+    return values.size();
 }
 
 std::vector<std::string> JsonObject::getKeys() const {
-    std::vector<std::string> vkeys(objectData.size());
+    std::vector<std::string> _keys(values.size());
     size_t index = 0;
 
     for(const std::string& key : keys){
-        vkeys[index++] = key;
+        _keys[index++] = key;
     }
 
-    return vkeys;
+    return _keys;
 }
 
-std::vector<JsonValue> JsonObject::getValues() const {
-    std::vector<JsonValue> values(objectData.size());
+std::vector<const JsonValue*> JsonObject::getValues() const {
+    std::vector<const JsonValue*> _values(values.size());
     size_t index = 0;
 
     for(const std::string& key : keys){
-        values[index++] = objectData.at(key);
+        _values[index++] = values.at(key) -> clone();
     }
 
-    return values;
+    return _values;
 }
 
 bool JsonObject::containsKey(const std::string& key) const {
-    return objectData.find(key) != objectData.end();
+    return values.find(key) != values.end();
 }
 
-void JsonObject::addKVP(const std::string& key, const JsonValue& value){
+void JsonObject::addKVP(const std::string& key, const JsonValue* const value) {
     if(containsKey(key)){
         const std::string message = "Key \"" + key + "\" already exists in JsonObject!";
         throw std::runtime_error(message);
     }
 
-    objectData.emplace(key, value);
+    values.emplace(key, value -> clone());
     keys.push_back(key);
 }
 
-void JsonObject::removeKVP(const std::string key){
+void JsonObject::removeKVP(const std::string& key) {
     if(!containsKey(key)){
         const std::string message = "Key \"" + key + "\" does not exist in JsonObject!";
         throw std::runtime_error(message);
@@ -84,32 +133,16 @@ void JsonObject::removeKVP(const std::string key){
     }
 
     keys.erase(keyIterator);
-    objectData.erase(key);
+
+    delete values.at(key);
+    values.erase(key);
 }
 
-const JsonValue& JsonObject::getValue(const std::string key) const {
+const JsonValue* JsonObject::getValue(const std::string& key) const {
     if(!containsKey(key)){
         const std::string message = "Key \"" + key + "\" does not exist in JsonObject!";
         throw std::runtime_error(message);
     }
 
-    return objectData.at(key);
-}
-
-void JsonObject::setValue(const std::string& key, const JsonValue& value){
-    if(!containsKey(key)){
-        const std::string message = "Key \"" + key + "\" does not exist in JsonObject!";
-        throw std::runtime_error(message);
-    }
-
-    objectData.at(key) = value;
-}
-
-std::ostream& operator<<(std::ostream& os, const JsonObject& jsonObject){
-    
-    const std::shared_ptr<JsonFormatter> formatter = JsonFormatConfig::getFormatter();
-
-    os << formatter -> format(jsonObject);
-
-    return os;
+    return values.at(key);
 }

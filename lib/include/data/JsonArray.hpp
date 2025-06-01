@@ -4,10 +4,15 @@
 #include <vector>
 #include "JsonValue.hpp"
 
-class JsonArray{
+class JsonArray : public JsonValue {
     public:
-        JsonArray();
-        explicit JsonArray(const std::vector<JsonValue>& _objectData);
+        ValueType getType() const override;
+        JsonValue* clone() const override;
+        void print(std::ostream& stream) const override;
+        void accept(JsonValueVisitor& visitor) override;
+
+        JsonArray() = default;
+        JsonArray(const std::vector<JsonValue*>& _arrayData);
         JsonArray(const JsonArray& other);
         JsonArray& operator=(const JsonArray& other);
         JsonArray(JsonArray&& other) noexcept;
@@ -15,13 +20,16 @@ class JsonArray{
         ~JsonArray();
 
         size_t getSize() const;
-        JsonValue& operator[](const size_t index);
-        const JsonValue& operator[](const size_t index) const;
-        void addValue(const JsonValue& value);
-
-        friend std::ostream& operator<<(std::ostream& os, const JsonArray& jsonArray);
+        JsonValue* operator[](const size_t index);
+        const JsonValue* operator[](const size_t index) const;
+        void addValue(const JsonValue* const value);     
     private:
-        std::vector<JsonValue> arrayData;
+        std::vector<JsonValue*> values;
+
+        void copyData(const std::vector<JsonValue*>& _arrayData);
+        void resetData(std::vector<JsonValue*>& _arrayData);
+        void deleteData();
 };
+
 
 #endif

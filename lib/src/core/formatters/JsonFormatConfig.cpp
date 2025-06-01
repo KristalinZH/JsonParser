@@ -1,14 +1,19 @@
-#include "formatters/JsonFormatConfig.hpp"
-#include "formatters/CompactJsonFormatter.hpp"
+#include "JsonFormatConfig.hpp"
+#include "CompactJsonFormatter.hpp"
+#include "PrettyJsonFormatter.hpp"
 
 namespace {
-    std::shared_ptr<JsonFormatter> currentFormatter = std::make_shared<CompactJsonFormatter>();
+    static FormatterType type = FormatterType::Compact;
 }
 
-void JsonFormatConfig::setFormatter(std::shared_ptr<JsonFormatter> formatter) {
-    currentFormatter = formatter;
+const JsonFormatter* JsonFormatConfig::getFormatter() {
+    if(type == FormatterType::Compact){
+        return &CompactJsonFormatter::getInstance();
+    }
+
+    return &PrettyJsonFormatter::getInstance();
 }
 
-std::shared_ptr<JsonFormatter> JsonFormatConfig::getFormatter() {
-    return currentFormatter;
+void JsonFormatConfig::setFormatterType(const FormatterType& _type) {
+    type = _type;
 }

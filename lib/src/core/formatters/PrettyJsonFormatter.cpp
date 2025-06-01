@@ -1,8 +1,13 @@
 #include <sstream>
-#include "formatters/PrettyJsonFormatter.hpp"
+#include "PrettyJsonFormatter.hpp"
 
-std::string PrettyJsonFormatter::format(const JsonArray& value, const size_t indent) const {
-    const size_t size = value.getSize();
+PrettyJsonFormatter& PrettyJsonFormatter::getInstance() {
+    static PrettyJsonFormatter instance;
+    return instance;
+}
+
+std::string PrettyJsonFormatter::format(const JsonArray* value, const size_t indent) const {
+    const size_t size = value -> getSize();
 
     if(size == 0)
         return std::string("[]");
@@ -13,12 +18,12 @@ std::string PrettyJsonFormatter::format(const JsonArray& value, const size_t ind
 
     for(size_t i = 0; i < size - 1; i++){
         writeIndentationIntoStream(output, indent + 1);
-        writeJsonIntoStream(output, value[i], indent + 1);
+        writeJsonIntoStream(output, (*value)[i], indent + 1);
         output << ",\n";
     }
 
     writeIndentationIntoStream(output, indent + 1);
-    writeJsonIntoStream(output, value[size - 1], indent + 1);
+    writeJsonIntoStream(output, (*value)[size - 1], indent + 1);
     output << '\n';
 
     writeIndentationIntoStream(output, indent);
@@ -29,8 +34,8 @@ std::string PrettyJsonFormatter::format(const JsonArray& value, const size_t ind
     return output.str();
 }
 
-std::string PrettyJsonFormatter::format(const JsonObject& value, const size_t indent) const {
-    const size_t size = value.getSize();
+std::string PrettyJsonFormatter::format(const JsonObject* value, const size_t indent) const {
+    const size_t size = value -> getSize();
 
     if(size == 0)
         return std::string("{}");
@@ -39,18 +44,18 @@ std::string PrettyJsonFormatter::format(const JsonObject& value, const size_t in
 
     output << "{\n";
 
-    std::vector<std::string> keys = value.getKeys();
+    std::vector<std::string> keys = value -> getKeys();
 
     for(size_t i = 0; i < size - 1; i++){
         writeIndentationIntoStream(output, indent + 1);
         output << '\"' << keys[i] << '\"' <<  " : ";
-        writeJsonIntoStream(output, value.getValue(keys[i]), indent + 1);
+        writeJsonIntoStream(output, value -> getValue(keys[i]), indent + 1);
         output << ",\n";
     }
 
     writeIndentationIntoStream(output, indent + 1);
     output << '\"' << keys[size - 1] << '\"' << " : ";
-    writeJsonIntoStream(output, value.getValue(keys[size - 1]), indent + 1);
+    writeJsonIntoStream(output, value -> getValue(keys[size - 1]), indent + 1);
     output << "\n";
 
     writeIndentationIntoStream(output, indent);
@@ -62,26 +67,25 @@ std::string PrettyJsonFormatter::format(const JsonObject& value, const size_t in
     return output.str();
 }
 
-void PrettyJsonFormatter::writeJsonIntoStream(std::ostream& os, const JsonValue& value, const size_t indent) const {
+void PrettyJsonFormatter::writeJsonIntoStream(std::ostream& os, const JsonValue* value, const size_t indent) const {
 
-    switch(value.getType()) {
+    switch(value -> getType()) {
 
         case ValueType::Null :
         case ValueType::Boolean :
-        case ValueType::Int :
-        case ValueType::Double : 
+        case ValueType::Number :
         case ValueType::String : {
             os << value;
             break;
         }
 
         case ValueType::Array : {
-            os << format(value.getAValue(), indent);
+            os << format(static_cast<const JsonArray*>(value), indent);
             break;
         }
 
         case ValueType::Object : {
-            os << format(value.getOValue(), indent);
+            os << format(static_cast<const JsonObject*>(value), indent);
             break;
         }
 
