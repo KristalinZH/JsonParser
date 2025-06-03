@@ -3,7 +3,7 @@
 
 #include "JsonFormatter.hpp"
 
-class CompactJsonFormatter : public JsonFormatter{
+class CompactJsonFormatter : public JsonFormatter {
     public:
         static CompactJsonFormatter& getInstance();
 

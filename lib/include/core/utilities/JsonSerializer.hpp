@@ -2,12 +2,12 @@
 #define JSONSERIALIZER
 
 #include <iostream>
-#include <string>
+#include "Path.hpp"
 #include "JsonValue.hpp"
 
-class JsonSerializer{
+class JsonSerializer {
     public:
-        void save(const JsonValue& json, std::ostream& stream, const std::string& path = "");
+        static void save(const JsonValue* const json, std::ostream& stream, const std::string& path);
 };
 
 #endif

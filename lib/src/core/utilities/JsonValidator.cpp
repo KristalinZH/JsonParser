@@ -111,7 +111,7 @@ std::pair<bool, std::string> JsonValidator::validateString(std::istream& stream,
                 return std::make_pair(false, errorMessage);
             }
 
-            isRevSolidusRead = !isRevSolidusRead;
+            isRevSolidusRead = true;
         }
 
         else if(iscntrl(symbol)){
@@ -124,7 +124,7 @@ std::pair<bool, std::string> JsonValidator::validateString(std::istream& stream,
                 return std::make_pair(false, errorMessage);
             }
 
-            isRevSolidusRead = !isRevSolidusRead;
+            isRevSolidusRead = false;
         }
 
         else if(symbol == '\"' && value[value.length() - 1] != '\\'){
@@ -132,6 +132,7 @@ std::pair<bool, std::string> JsonValidator::validateString(std::istream& stream,
             break;
         }
 
+        isRevSolidusRead = false;
         value.append(1, symbol);
     }
 

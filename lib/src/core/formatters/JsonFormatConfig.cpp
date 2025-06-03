@@ -3,7 +3,7 @@
 #include "PrettyJsonFormatter.hpp"
 
 namespace {
-    static FormatterType type = FormatterType::Compact;
+    static FormatterType type = FormatterType::Pretty;
 }
 
 const JsonFormatter* JsonFormatConfig::getFormatter() {

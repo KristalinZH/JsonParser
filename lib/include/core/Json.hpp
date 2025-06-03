@@ -9,37 +9,27 @@
 #include "JsonSerializer.hpp"
 #include "JsonValidator.hpp"
 
-class Json{
+class Json {
     public:
-        Json() = delete;
+        Json(std::istream& stream);
         Json(const Json& other) = delete;
         Json& operator=(const Json& other) = delete;
-        Json(Json&& other) noexcept = default;
-        Json& operator=(Json&& other) noexcept = default;
-        ~Json() = default;
+        ~Json();
 
-        static Json parse(std::istream& stream);
-        static std::pair<bool, std::string> validate(std::istream& stream);
-        std::string print();
-        std::pair<bool, std::string> search(const std::regex& reg);
-        std::pair<bool, std::string> set(const std::string& path, const std::string value);
-        std::pair<bool, std::string> create(const std::string& path, const std::string value);
-        std::pair<bool, std::string> erase(const std::string& path);
-        std::pair<bool, std::string> move(const std::string& from, const std::string& to);
-        std::pair<bool, std::string> save(std::ostream& stream, const std::string& path = "");
+        static std::string validate(std::istream& stream);
+        void print(std::ostream& stream);
+        void prettyPrint(std::ostream& stream);
+        void search(std::ostream& stream, const std::string& searchRegex);
+        void set(const std::string& path, const std::string& value);
+        void create(const std::string& path, const std::string& value);
+        void erase(const std::string& path);
+        void move(const std::string& from, const std::string& to);
+        void save(std::ostream& stream, const std::string& path);
 
     private:
-        std::string streamContnent;
-        std::shared_ptr<JsonValue> json;
+        JsonValue* json;
 
-        static JsonEditor editor;
-        static JsonParser parser;
-        static JsonPrinter printer;
-        static JsonSearcher searcher;
-        static JsonSerializer serializer;
-        static JsonValidator validator; 
-
-        explicit Json(const std::string& _streamContent, const std::shared_ptr<JsonValue>& _json);
+        static std::string readStreamContent(std::istream& stream);
 };
 
 #endif

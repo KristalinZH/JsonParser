@@ -3,11 +3,24 @@
 
 #include <string>
 #include <regex>
-#include "JsonArray.hpp"
+#include "JsonValueVisitor.hpp"
 
-class JsonSearcher{
+class JsonSearcher : public JsonValueVisitor {
     public:
-        std::string search(const JsonValue& json,const std::regex& reg);
+        void visit(JsonNull& jsonValue) override;
+        void visit(JsonBoolean& jsonValue) override;
+        void visit(JsonNumber& jsonValue) override;
+        void visit(JsonString& jsonValue) override;
+        void visit(JsonArray& jsonValue) override;
+        void visit(JsonObject& jsonValue) override;
+    
+        std::vector<JsonValue*>getResults() const;
+
+        JsonSearcher(const std::string& searchRegex);
+        ~JsonSearcher();
+    private:
+        std::regex regex;
+        std::vector<JsonValue*> searchResults;
 };
 
 #endif

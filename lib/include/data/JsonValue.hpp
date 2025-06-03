@@ -29,4 +29,36 @@ inline std::ostream& operator<<(std::ostream& stream, const JsonValue* jsonValue
     return stream;
 }
 
+inline std::ostream& operator<<(std::ostream& stream, const ValueType& type) {
+    switch (type)
+    {
+        case ValueType::Null : {
+            stream << "null";
+            break;
+        }
+        case ValueType::Boolean : {
+            stream << "boolean";
+            break;
+        }
+        case ValueType::Number : {
+            stream << "number";
+            break;
+        }
+        case ValueType::String : {
+            stream << "string";
+            break;
+        }
+        case ValueType::Array : {
+            stream << "array";
+            break;
+        }
+        default : {
+            stream << "object";
+            break;
+        }
+    }
+
+    return stream;
+}
+
 #endif

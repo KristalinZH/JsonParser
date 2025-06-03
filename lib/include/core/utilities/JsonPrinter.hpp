@@ -3,10 +3,10 @@
 
 #include "JsonFormatConfig.hpp"
 
-class JsonPrinter{
+class JsonPrinter {
     public:
-        std::string print(const JsonValue* const jsonValue);
-        std::string prettyPrint(const JsonValue* const jsonValue);
+        static std::string print(const JsonValue* const jsonValue);
+        static std::string prettyPrint(const JsonValue* const jsonValue);
 };
 
 #endif

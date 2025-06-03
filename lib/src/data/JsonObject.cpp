@@ -119,6 +119,12 @@ void JsonObject::addKVP(const std::string& key, const JsonValue* const value) {
     keys.push_back(key);
 }
 
+void JsonObject::editKVP(const std::string& key, const JsonValue* const value) {
+    delete values.at(key);
+
+    values[key] = value -> clone();
+}
+
 void JsonObject::removeKVP(const std::string& key) {
     if(!containsKey(key)){
         const std::string message = "Key \"" + key + "\" does not exist in JsonObject!";

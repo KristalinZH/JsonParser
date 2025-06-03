@@ -1,12 +1,18 @@
 #ifndef JSONPARSER
 #define JSONPARSER
 
-#include <memory>
 #include "JsonObject.hpp"
 
-class JsonParser{
+class JsonParser {
     public:
-        std::pair<std::string, std::unique_ptr<JsonValue>> parse();
+        static JsonValue* parse(std::istream& stream);
+    private:
+        static std::string parseNull(std::istream& stream);
+        static std::string parseBoolean(std::istream& stream, const char lastSymbol);
+        static std::string parseNumber(std::istream& stream, const char lastSymbol);
+        static std::string parseString(std::istream& stream, const char lastSymbol);
+        static JsonValue* parsePrimary(std::istream& stream, const char lastSymbol);
+        static JsonValue* parseJson(std::istream& stream, const char lastBrace);
 };
 
 #endif

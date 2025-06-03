@@ -26,6 +26,7 @@ class JsonObject : public JsonValue {
         std::vector<const JsonValue*> getValues() const;
         bool containsKey(const std::string& key) const;
         void addKVP(const std::string& key, const JsonValue* const value);
+        void editKVP(const std::string& key, const JsonValue* const value);
         void removeKVP(const std::string& key);
         const JsonValue* getValue(const std::string& key) const;
     private:

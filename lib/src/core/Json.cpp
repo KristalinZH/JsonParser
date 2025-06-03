@@ -1,26 +1,192 @@
 #include "Json.hpp"
+#include "JsonFactory.hpp"
+#include "Path.hpp"
 
-JsonEditor Json::editor;
-JsonParser Json::parser;
-JsonPrinter Json::printer;
-JsonSearcher Json::searcher;
-JsonSerializer Json::serializer;
-JsonValidator Json::validator; 
+Json::Json(std::istream& stream) {
+    const std::string content = readStreamContent(stream);
 
-// static Json parse(std::istream& stream);
+    if(content == "") {
+        throw std::runtime_error("Empty stream!");
+    }
 
-// static std::pair<bool, std::string> validate(std::istream& stream);
+    std::istringstream contentStream(content);
+    std::pair<bool, std::string> isValid = JsonValidator::validateJson(contentStream);
 
-// std::string print();
+    if(!isValid.first) {
+        throw std::runtime_error(isValid.second);
+    }
+    
+    contentStream.clear();
+    contentStream.str(content);
+    contentStream.seekg(0);
+    
+    json = JsonParser::parse(contentStream);
 
-// std::pair<bool, std::string> search(const std::regex& reg);
+}
 
-// std::pair<bool, std::string> set(const std::string& path, const std::string value);
+Json::~Json() {
+    delete json;
+    json = nullptr;
+}
 
-// std::pair<bool, std::string> create(const std::string& path, const std::string value);
+std::string Json::validate(std::istream& stream) {
+    const std::string content = readStreamContent(stream);
 
-// std::pair<bool, std::string> erase(const std::string& path);
+    std::istringstream contentStream(content);
+    std::pair<bool, std::string> isValid = JsonValidator::validateJson(contentStream);
 
-// std::pair<bool, std::string> move(const std::string& from, const std::string& to);
+    if(isValid.first) {
+        return "The json is valid!";
+    }
 
-// std::pair<bool, std::string> save(std::ostream& stream, const std::string& path = "");
+    return isValid.second;
+}
+
+void Json::print(std::ostream& stream) {
+    stream << JsonPrinter::print(json);
+}
+
+void Json::prettyPrint(std::ostream& stream) {
+    stream << JsonPrinter::prettyPrint(json);
+}
+
+void Json::search(std::ostream& stream, const std::string& searchRegex) {
+
+    if(json -> getType() != ValueType::Object && json -> getType() != ValueType::Array ) {
+        std::ostringstream errorMessageSteam;
+        errorMessageSteam << "Cannot perform search on type " << json -> getType();
+        throw std::runtime_error(errorMessageSteam.str());
+    }
+
+    JsonSearcher searcher(searchRegex);
+
+    json -> accept(searcher);
+
+    std::vector<JsonValue*> searchResults = searcher.getResults();
+
+    if(searchResults.size() == 0) {
+        stream << "No matching results were found!";
+        return;
+    }
+
+    JsonValue* arrayWithResults = JsonFactory::create(searchResults);
+
+    stream << JsonPrinter::prettyPrint(arrayWithResults);
+
+    delete arrayWithResults;
+
+    for(JsonValue* result : searchResults) {
+        delete result;
+    }
+
+}
+
+void Json::set(const std::string& path, const std::string& value) {
+
+    if(!(Path::validatePath(json, path))) {
+        throw std::runtime_error("Cannot perform set on path to non-existing element!");
+    }
+
+    if(json -> getType() != ValueType::Object) {
+        std::ostringstream errorMessageSteam;
+        errorMessageSteam << "Cannot perform set on type " << json -> getType();
+        throw std::runtime_error(errorMessageSteam.str());
+    }
+
+    std::istringstream valueStream(value);
+
+    std::pair<bool, std::string> isValid = JsonValidator::validateJson(valueStream);
+
+    if(!isValid.first) {
+        const std::string message = "Invalid value! " + isValid.second;
+        throw std::runtime_error(message);
+    }
+
+    JsonEditor editor(json);
+
+    json -> accept(editor);
+
+    editor.set(path, value);
+}
+
+void Json::create(const std::string& path, const std::string& value) {
+
+    if(json != nullptr && json -> getType() != ValueType::Object) {
+        std::ostringstream errorMessageSteam;
+        errorMessageSteam << "Cannot perform create on type " << json -> getType();
+        throw std::runtime_error(errorMessageSteam.str());
+    }
+
+    if(Path::validatePath(json, path)) {
+        throw std::runtime_error("Cannot perform create on path to already existing element!");
+    }
+
+    std::istringstream valueStream(value);
+
+    std::pair<bool, std::string> isValid = JsonValidator::validateJson(valueStream);
+
+    if(!isValid.first) {
+        const std::string message = "Invalid value! " + isValid.second;
+        throw std::runtime_error(message);
+    }
+
+    JsonEditor editor(json);
+
+    json -> accept(editor);
+
+    editor.create(path, value);
+}
+
+void Json::erase(const std::string& path) {
+
+    if(json != nullptr && json -> getType() != ValueType::Object) {
+        std::ostringstream errorMessageSteam;
+        errorMessageSteam << "Cannot perform erase on type " << json -> getType();
+        throw std::runtime_error(errorMessageSteam.str());
+    }
+
+    if(!(Path::validatePath(json, path))) {
+        throw std::runtime_error("Cannot perform delete on path to non-existing element!");
+    }
+
+    JsonEditor editor(json);
+
+    json -> accept(editor);
+
+    editor.erase(path);
+}
+
+void Json::move(const std::string& from, const std::string& to) {
+    
+    if(json == nullptr) {
+        throw std::runtime_error("Cannot perform move on deleted json!");
+    }
+
+    if(json -> getType() != ValueType::Object) {
+        std::ostringstream errorMessageSteam;
+        errorMessageSteam << "Cannot perform move on type " << json -> getType();
+        throw std::runtime_error(errorMessageSteam.str());
+    }
+
+    if(!(Path::validatePath(json, from))) {
+        throw std::runtime_error("Cannot perform move on path to non-existing element!");
+    }
+
+    JsonEditor editor(json);
+
+    json -> accept(editor);
+
+    editor.move(from, to);
+}
+
+void Json::save(std::ostream& stream, const std::string& path) {
+    if(!(Path::validatePath(json, path))) {
+        throw std::runtime_error("Cannot perform save on path to non-existing element!");
+    }
+
+    JsonSerializer::save(json, stream, path);
+}
+
+std::string Json::readStreamContent(std::istream& stream) {
+    return std::string((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+}

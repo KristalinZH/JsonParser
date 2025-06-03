@@ -3,7 +3,7 @@
 
 #include "JsonFormatter.hpp"
 
-class PrettyJsonFormatter : public JsonFormatter{
+class PrettyJsonFormatter : public JsonFormatter {
     public:
         static PrettyJsonFormatter& getInstance();
 

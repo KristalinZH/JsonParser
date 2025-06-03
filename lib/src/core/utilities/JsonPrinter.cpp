@@ -9,11 +9,12 @@ std::string JsonPrinter::print(const JsonValue* const jsonValue){
 
     os << jsonValue;
 
+    JsonFormatConfig::setFormatterType(FormatterType::Pretty);
 
     return os.str();
 }
 
-std::string prettyPrint(const JsonValue* const jsonValue) {
+std::string JsonPrinter::prettyPrint(const JsonValue* const jsonValue) {
 
     JsonFormatConfig::setFormatterType(FormatterType::Pretty);
 

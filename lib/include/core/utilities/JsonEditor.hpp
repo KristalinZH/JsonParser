@@ -1,14 +1,31 @@
 #ifndef JSONEDITOR
 #define JSONEDITOR
 
-#include "JsonValue.hpp"
+#include "JsonValueVisitor.hpp"
 
-class JsonEditor{
+class JsonEditor : public JsonValueVisitor {
     public:
-        void set(JsonValue& json, const std::string& path, const std::string value);
-        void create(JsonValue& json,const std::string& path, const std::string value);
-        void erase(JsonValue& json, const std::string& path);
-        void move(JsonValue& json,const std::string& from, const std::string& to);
+        void visit(JsonNull& jsonValue) override;
+        void visit(JsonBoolean& jsonValue) override;
+        void visit(JsonNumber& jsonValue) override;
+        void visit(JsonString& jsonValue) override;
+        void visit(JsonArray& jsonValue) override;
+        void visit(JsonObject& jsonValue) override;
+
+
+        void set(const std::string& path, const std::string& value);
+        void create(const std::string& path, const std::string& value);
+        void erase(const std::string& path);
+        void move(const std::string& from, const std::string& to);
+
+        JsonEditor(JsonValue*& _rootRef);
+
+    private:
+        JsonValue*& rootRef;
+        JsonValue* object = nullptr;
+
+        JsonValue* createFromPath(const std::string& path, const std::string& value);
+    
 };
 
 #endif
