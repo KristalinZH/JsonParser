@@ -5,30 +5,65 @@
 #include "JsonFactory.hpp"
 #include "JsonPrinter.hpp"
 
+/**
+ * @brief Constructor that initializes the root reference
+ * @param _rootRef Reference to the root JSON value pointer
+ */
+JsonEditor::JsonEditor(JsonValue*& _rootRef):rootRef(_rootRef) {}
+
+/**
+ * @brief Visitor implementation for JsonNull values
+ * @param jsonValue Reference to JsonNull value
+ */
 void JsonEditor::visit(JsonNull& jsonValue) {
    return;
 }
 
+/**
+ * @brief Visitor implementation for JsonBoolean values
+ * @param jsonValue Reference to JsonBoolean value
+ */
 void JsonEditor::visit(JsonBoolean& jsonValue)  {
     return;
 }
 
+/**
+ * @brief Visitor implementation for JsonNumber values
+ * @param jsonValue Reference to JsonNumber value
+ */
 void JsonEditor::visit(JsonNumber& jsonValue)  {
     return;
 }
 
+/**
+ * @brief Visitor implementation for JsonString values
+ * @param jsonValue Reference to JsonString value
+ */
 void JsonEditor::visit(JsonString& jsonValue) {
     return;
 }
 
+/**
+ * @brief Visitor implementation for JsonArray values
+ * @param jsonValue Reference to JsonArray value
+ */
 void JsonEditor::visit(JsonArray& jsonValue) {
    return;
 }
 
+/**
+ * @brief Visitor implementation for JsonObject values
+ * @param jsonValue Reference to JsonObject value
+ */
 void JsonEditor::visit(JsonObject& jsonValue) {
     object = rootRef;
 }
 
+/**
+ * @brief Sets a value at the specified path
+ * @param path Path where to set the value
+ * @param value String representation of the value to set
+ */
 void JsonEditor::set(const std::string& path, const std::string& value) {
 
     if(object == nullptr) {
@@ -60,6 +95,11 @@ void JsonEditor::set(const std::string& path, const std::string& value) {
     delete newValue;
 }
 
+/**
+ * @brief Creates a new value at the specified path
+ * @param path Path where to create the value
+ * @param value String representation of the value to create
+ */
 void JsonEditor::create(const std::string& path, const std::string& value) {
 
     if(object == nullptr) {
@@ -102,6 +142,10 @@ void JsonEditor::create(const std::string& path, const std::string& value) {
 
 }
 
+/**
+ * @brief Erases a value at the specified path
+ * @param path Path to the value to erase
+ */
 void JsonEditor::erase(const std::string& path) {
 
     if(path == "") {
@@ -117,6 +161,11 @@ void JsonEditor::erase(const std::string& path) {
     node -> removeKVP(key);
 }
 
+/**
+ * @brief Moves a value from one path to another
+ * @param from Source path
+ * @param to Destination path
+ */
 void JsonEditor::move(const std::string& from, const std::string& to) {
     const std::string& valueToMove = JsonPrinter::prettyPrint((Path::getValue(object, from)));
 
@@ -142,6 +191,12 @@ void JsonEditor::move(const std::string& from, const std::string& to) {
     create(to, valueToMove);
 }
 
+/**
+ * @brief Creates a JSON value from a path and string value
+ * @param path Path to create the value at
+ * @param value String representation of the value
+ * @return Pointer to the created JSON value
+ */
 JsonValue* JsonEditor::createFromPath(const std::string& path, const std::string& value) {
 
     const std::string root = Path::getRoot(path);
@@ -159,5 +214,3 @@ JsonValue* JsonEditor::createFromPath(const std::string& path, const std::string
 
     return object;
 }
-
-JsonEditor::JsonEditor(JsonValue*& _rootRef):rootRef(_rootRef) {}

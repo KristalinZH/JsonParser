@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include "Commands.hpp"
 
+/**
+ * @brief Represents available commands in the JSON parser application
+ */
 enum class Command {
     Unknown,
     Open,
@@ -20,6 +23,11 @@ enum class Command {
     Exit
 };
 
+/**
+ * @brief Splits an input string into a vector of arguments
+ * @param input The input string to split
+ * @return Vector of string arguments
+ */
 std::vector<std::string> splitLine(const std::string& input) {
     std::vector<std::string> args;
     std::istringstream stream(input);
@@ -32,6 +40,9 @@ std::vector<std::string> splitLine(const std::string& input) {
     return args;
 }
 
+/**
+ * @brief Clears the console screen
+ */
 void clearScreen() {
     #ifdef _WIN32
         system("cls");
@@ -40,6 +51,11 @@ void clearScreen() {
     #endif
 }
 
+/**
+ * @brief Converts a string command to the corresponding Command enum value
+ * @param cmd String command to convert
+ * @return Command enum value corresponding to the input string
+ */
 Command getCommand(const std::string& cmd) {
     std::string lowerCmd = cmd;
     std::transform(lowerCmd.begin(), lowerCmd.end(), lowerCmd.begin(), [](unsigned char c){ return std::tolower(c);});
@@ -61,6 +77,12 @@ Command getCommand(const std::string& cmd) {
     return Command::Unknown;
 }
 
+/**
+ * @brief Executes the given command with provided arguments
+ * @param cmds Reference to Commands object that handles JSON operations
+ * @param args Vector of command arguments
+ * @param shouldExecute Reference to boolean controlling program execution
+ */
 void performCommand(Commands& cmds, const std::vector<std::string>& args, bool& shouldExecute) {
     Command cmd = getCommand(args[0]);
 
@@ -210,6 +232,10 @@ void performCommand(Commands& cmds, const std::vector<std::string>& args, bool& 
     }
 }
 
+/**
+ * @brief Main entry point of the JSON parser application
+ * @return Exit status code
+ */
 int main(){
     Commands cmds;
     bool shouldExecute = true;

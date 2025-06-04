@@ -1,6 +1,14 @@
 #include <regex>
 #include "JsonValidator.hpp"
 
+/**
+ * @brief Validates a JSON null value
+ * @param stream Input stream to validate
+ * @param lastSymbol Last character read
+ * @param row Current row number
+ * @param lastRowPosition Position in current row
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validateNull(std::istream& stream, const char lastSymbol, const size_t row, size_t& lastRowPosition){
     std::string value(1, lastSymbol);
     char symbol = '\0';
@@ -29,6 +37,14 @@ std::pair<bool, std::string> JsonValidator::validateNull(std::istream& stream, c
 
 }
 
+/**
+ * @brief Validates a JSON boolean value
+ * @param stream Input stream to validate
+ * @param lastSymbol Last character read
+ * @param row Current row number
+ * @param lastRowPosition Position in current row
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validateBoolean(std::istream& stream, const char lastSymbol, const size_t row, size_t& lastRowPosition){
     std::string value(1, lastSymbol);
     char symbol = '\0';
@@ -60,6 +76,14 @@ std::pair<bool, std::string> JsonValidator::validateBoolean(std::istream& stream
 
 }
 
+/**
+ * @brief Validates a JSON number value
+ * @param stream Input stream to validate
+ * @param lastSymbol Last character read
+ * @param row Current row number
+ * @param lastRowPosition Position in current row
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validateNumber(std::istream& stream, const char lastSymbol, const size_t row, size_t& lastRowPosition){
 
     std::string value(1, lastSymbol);
@@ -92,6 +116,14 @@ std::pair<bool, std::string> JsonValidator::validateNumber(std::istream& stream,
     return std::make_pair(true, value);
 }
 
+/**
+ * @brief Validates a JSON string value
+ * @param stream Input stream to validate
+ * @param lastSymbol Last character read
+ * @param row Current row number
+ * @param lastRowPosition Position in current row
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validateString(std::istream& stream, const char lastSymbol, const size_t row, size_t& lastRowPosition){
 
     std::string value(1, lastSymbol);
@@ -150,6 +182,18 @@ std::pair<bool, std::string> JsonValidator::validateString(std::istream& stream,
     return std::make_pair(true, value);
 }
 
+/**
+ * @brief Validates a primary JSON value
+ * @param stream Input stream to validate
+ * @param symbol Current symbol being processed
+ * @param row Current row number
+ * @param position Current position in row
+ * @param stateOfReading Current reading state
+ * @param mode Current reading mode
+ * @param isCommaFound Flag indicating if comma was found
+ * @param objectKeys Set of object keys for duplicate detection
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validatePrimary(std::istream& stream, const char symbol, const size_t row, size_t& position, size_t& stateOfReading, const ReadingMode& mode, bool& isCommaFound, std::unordered_set<std::string>& objectKeys){
     size_t stateModeCase = stateOfReading;
     
@@ -274,6 +318,15 @@ std::pair<bool, std::string> JsonValidator::validatePrimary(std::istream& stream
     }
 }
 
+/**
+ * @brief Main validation function for JSON content
+ * @param stream Input stream to validate
+ * @param row Current row number
+ * @param position Current position in row
+ * @param lastBrace Last opening brace/bracket encountered
+ * @param mode Current reading mode
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validate(std::istream& stream, size_t& row, size_t& position, char lastBrace, const ReadingMode& mode){
 
     std::unordered_set<std::string> objectKeys;
@@ -367,6 +420,11 @@ std::pair<bool, std::string> JsonValidator::validate(std::istream& stream, size_
 
 }
 
+/**
+ * @brief Entry point for JSON validation
+ * @param stream Input stream containing JSON to validate
+ * @return Pair of validation result and error/success message
+ */
 std::pair<bool, std::string> JsonValidator::validateJson(std::istream& stream){
     size_t row = 1, position = 1;
     std::pair<bool, std::string> validationResult = validate(stream, row, position);
