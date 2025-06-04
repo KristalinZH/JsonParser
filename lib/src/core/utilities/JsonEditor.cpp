@@ -123,7 +123,19 @@ void JsonEditor::move(const std::string& from, const std::string& to) {
     erase(from);
 
     if(Path::validatePath(object, to)) {
-        set(to, valueToMove);
+
+        JsonObject* node = const_cast<JsonObject*>(Path::getParent(object, to));
+
+        const std::string key = Path::getKey(to);
+
+        std::istringstream stream(valueToMove);
+
+        const JsonValue* newValue = JsonParser::parse(stream);
+
+        node -> addKVP(key, newValue);
+
+        delete newValue;
+
         return;
     }
 

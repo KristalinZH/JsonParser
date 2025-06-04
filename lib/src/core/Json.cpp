@@ -75,10 +75,6 @@ void Json::search(std::ostream& stream, const std::string& searchRegex) {
 
     delete arrayWithResults;
 
-    for(JsonValue* result : searchResults) {
-        delete result;
-    }
-
 }
 
 void Json::set(const std::string& path, const std::string& value) {

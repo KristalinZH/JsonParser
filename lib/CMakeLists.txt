@@ -11,7 +11,7 @@ target_include_directories(JsonParserLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core>
 )
 
-target_include_directories(JsonParserLib PRIVATE
+target_include_directories(JsonParserLib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/data>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core/formatters>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core/utilities>

@@ -23,7 +23,7 @@ void JsonSearcher::visit(JsonArray& jsonValue) {
 
         const JsonValue* value = jsonValue[i];
 
-        if(value -> getType() == ValueType::Object) {
+        if(value -> getType() == ValueType::Object || value -> getType() == ValueType::Array) {
             JsonValue* objValue = value -> clone();
             objValue -> accept(*this);
             delete objValue;
@@ -45,7 +45,7 @@ void JsonSearcher::visit(JsonObject& jsonValue) {
             searchResults.push_back(value -> clone());
         }
 
-        if(value -> getType() == ValueType::Object) {
+        if(value -> getType() == ValueType::Object || value -> getType() == ValueType::Array) {
             JsonValue* pcopy = const_cast<JsonValue*>(value);
             pcopy -> accept(*this);
         }
